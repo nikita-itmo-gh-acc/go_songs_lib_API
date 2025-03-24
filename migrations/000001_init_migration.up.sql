@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS groups (
+    "id" SERIAL PRIMARY KEY,
+    "name" VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS songs (
+    "id" SERIAL PRIMARY KEY,
+    "groupId" INTEGER REFERENCES groups(id) ON DELETE CASCADE,
+    "name" VARCHAR(255) NOT NULL,
+    "releaseDate" DATE NOT NULL,
+    "text" TEXT NOT NULL,
+    "link" VARCHAR(255)
+);

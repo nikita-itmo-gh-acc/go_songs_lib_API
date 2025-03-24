@@ -1,0 +1,202 @@
+basePath: /api/v1
+definitions:
+  main.SongAddRequest:
+    properties:
+      group:
+        type: string
+      song:
+        type: string
+    type: object
+  main.SongResponse:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      songs:
+        items:
+          $ref: '#/definitions/storage.Song'
+        type: array
+    type: object
+  main.SongTextResponse:
+    properties:
+      couplets:
+        items:
+          type: string
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+    type: object
+  storage.Song:
+    properties:
+      group:
+        type: string
+      groupId:
+        type: integer
+      id:
+        type: integer
+      link:
+        type: string
+      releaseDate:
+        type: string
+      song:
+        type: string
+      text:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: nickita-ananiev@yandex.ru
+  description: This is a project implementing a service, providing songs information.
+  title: Songs Library API
+  version: "1.0"
+paths:
+  /songs:
+    get:
+      description: This endpoint parses url query params and do SQL select request
+        based on them.
+      parameters:
+      - description: Maximum number of songs to return
+        in: query
+        name: limit
+        type: integer
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.SongResponse'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Returns a songs search result
+      tags:
+      - songs search
+  /songs/{id}:
+    delete:
+      parameters:
+      - description: Song ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Deletes song by Id
+      tags:
+      - songs operations
+    get:
+      parameters:
+      - description: Song ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/storage.Song'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Gets song by Id
+      tags:
+      - songs operations
+    put:
+      parameters:
+      - description: Song ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Song update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/storage.Song'
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Updates song by Id
+      tags:
+      - songs operations
+  /songs/{id}/text:
+    get:
+      description: Does search for the song in database, then splits its text to couplets
+      parameters:
+      - description: Song ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Maximum number of couplets to return
+        in: query
+        name: limit
+        type: integer
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.SongTextResponse'
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Returns song text fragment
+      tags:
+      - text pagination
+  /songs/add:
+    post:
+      parameters:
+      - description: Song creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.SongAddRequest'
+      responses:
+        "201":
+          description: Created
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Adds new song
+      tags:
+      - songs operations
+swagger: "2.0"
