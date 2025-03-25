@@ -66,7 +66,7 @@ func (s *GroupStorage) Find(q query.Query) ([]*Group, error) {
 	reserved_capacity := 100
 	groups := make([]*Group, 0, reserved_capacity)
 
-	rows, err := s.DB.Query(`SELECT * FROM groups WHERE name LIKE '%$1%'`, groupQuery.Name)
+	rows, err := s.DB.Query(`SELECT * FROM groups WHERE name LIKE '%' || $1 || '%'`, groupQuery.Name)
 
 	if err != nil {
 		logger.Err.Println("groups search failed - ", err)

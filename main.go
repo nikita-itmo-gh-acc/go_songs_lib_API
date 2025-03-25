@@ -28,6 +28,8 @@ import (
 	"songsapi/query"
 	"songsapi/storage"
 
+	"time"
+
 	"os"
 )
 
@@ -303,10 +305,18 @@ func (h *SongAddHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	
 	PasreJSON(resp.Body, &newSong)
 
+	parsedDate, err := time.Parse("02.01.2006", newSong.ReleaseDate)
+	if err != nil {
+		logger.Err.Println("can't parse release date - ", err)
+		http.Error(w, "Can't parse data from info API", http.StatusInternalServerError)
+		return
+	}
+
+	newSong.ReleaseDate = parsedDate.Format("2006-01-02")
+
 	err = h.GroupsTable.Create(&storage.Group{ Name: newSong.Group })
 	if err != nil {
 		pgErr, ok := err.(*pq.Error)
-
 		if !(ok && pgErr.Code == "23505") {
 			logger.Err.Println("group creation failed - ", err)
 			http.Error(w, "Can't add group into database", http.StatusInternalServerError)
@@ -314,12 +324,24 @@ func (h *SongAddHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	groups, err := h.GroupsTable.Find(&query.GroupQuery{ Name: newSong.Group })
+	if err != nil {
+		logger.Err.Println("group search failed - ", err)
+		http.Error(w, "Can't add new song due to database error", http.StatusInternalServerError)
+		return
+	}
+
+	foundGroup := groups[0]
+	newSong.GroupId = foundGroup.Id
 	err = h.SongsTable.Create(&newSong)
 	if err != nil {
 		logger.Err.Println("song creation failed - ", err)
 		http.Error(w, "Can't add new song into database", http.StatusInternalServerError)
 		return
 	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte("Song succesfully added"))
 }
 
 func HandleDBSearchFail(w http.ResponseWriter, e error) {

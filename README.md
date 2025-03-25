@@ -1,7 +1,10 @@
 # go_songs_lib_API
 API для серсиса, имитирующего различных песен и авторов (групп)
 
-# Как запустить?
+# Как запустить в докере?
+## Требования:
+- Установленный docker
+- Docker Desktop (для Windows)
 ## 1 Собираем контейнеры: 
 ```shell
 docker compose up -d --build
@@ -16,13 +19,20 @@ docker exec -it db_container pg_restore -U postgres -d songs_db /backups/songsDa
 ```
 
 # Как запустить локально?
-## 1 Нужно поменять host внутри DB_URL и POSTGRES_URL. Поменять SERV_PORT на 8080:
+## Требования:
+- Golang (1.23+)
+- PostgreSQL 16.0
+## 1 Устанавливаем зависимости:
+```shell
+go mod download
+```
+## 2 Нужно поменять host внутри DB_URL и POSTGRES_URL. Поменять SERV_PORT на 8080:
 ```shell
 DB_URL='host=db_container...' --> DB_URL='host=localhost...'
 POSTGRES_URL='host=db_container...' --> POSTGRES_URL='host=localhost...'
 SERV_PORT=8081 --> SERV_PORT=8080
 ```
-## 2 Запустить файл main.go:
+## 3 Запустить файл main.go:
 ```shell
 go run main.go
 ```
